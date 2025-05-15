@@ -1,29 +1,18 @@
-# FastAPI and Web Services
-fastapi>=0.95.0
-uvicorn>=0.22.0
-pydantic>=2.0.0
-pydantic-settings>=2.0.0
-python-multipart>=0.0.6
-python-dotenv>=1.0.0
-
-# Database
-SQLAlchemy>=2.0.0
-psycopg2-binary>=2.9.6
-alembic>=1.10.0
-
-# Async Task Processing
-celery>=5.3.0
-redis>=4.5.0
-
-# Haystack and AI Related
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+python-multipart
+python-dotenv
+SQLAlchemy
+psycopg2-binary
+alembic
+celery
+redis
 haystack-ai
-faiss-cpu>=1.7.4  # or faiss-gpu for GPU acceleration
-
-# GitHub API
-PyGithub>=1.59.0
-requests>=2.28.0
-
-# Utility Libraries
-tenacity>=8.2.0  # for retry mechanism
-beautifulsoup4>=4.12.0  # for HTML parsing
-markdown>=3.4.0  # for Markdown processing
+faiss-cpu
+PyGithub
+requests
+tenacity
+beautifulsoup4
+markdown

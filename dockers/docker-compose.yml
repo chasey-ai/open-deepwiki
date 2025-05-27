@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL 数据库服务
+  postgres:
+    image: postgres:15-alpine
+    container_name: dev_postgres_open_deepwiki
+    env_file: .env.postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-open_deepwiki_db}
+    volumes:
+      - ../.data/postgres_data:/var/lib/postgresql/data # Mac 本地 ../.data/postgres_data 目录
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432" # 映射到 Mac 的 5432 端口
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - deepwiki_network
+
+  # 2. Redis 服务
+  redis:
+    image: redis:7-alpine
+    container_name: dev_redis_open_deepwiki
+    command: redis-server --appendonly yes
+    volumes:
+      - ../.data/redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379" # 映射到 Mac 的 6379 端口
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - deepwiki_network
+
+# 如果 Celery worker 需要独立运行，并且不方便本地直接起 worker
+# 也可以在这里定义，但它需要能访问本地启动的 FastAPI 应用（如果 task 定义在那里）
+# 或者 worker 的代码也通过 volume 挂载到容器内。
+# 不过初期，如果任务简单，Celery worker 也可以考虑和 FastAPI 一起在本地运行。
+
+volumes:
+  postgres_data: # 定义这个只是为了 compose 文件校验，实际绑定的是上面的本地路径
+  redis_data:
+
+networks:
+  deepwiki_network:
+    driver: bridge

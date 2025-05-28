@@ -1,24 +1,54 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Path
+from pydantic import BaseModel, Field
+from typing import Any, Optional
 
-# 将来从服务层导入
-# from app.services.task_service import get_task_status
-# from app.schemas.task import TaskStatusResponse
+# Import the new TaskService
+from app.services.task_service import TaskService
 
 router = APIRouter()
 
-@router.get("/{task_id}")
-async def get_status(task_id: str):
+# --- Pydantic Models for this endpoint ---
+class TaskStatusDetailResponse(BaseModel):
+    task_id: str = Field(..., description="The ID of the Celery task.")
+    status: str = Field(..., description="The current status of the task (e.g., PENDING, SUCCESS, FAILURE).")
+    result: Optional[Any] = Field(None, description="The result of the task if completed, or error details if failed.")
+    details: Optional[Any] = Field(None, description="Additional details or metadata about the task's progress.")
+
+# --- Dependency Injection for Services ---
+def get_task_service():
+    # Assumes TaskService can be initialized without arguments,
+    # or its dependencies (like Celery app) are globally available/configured.
+    return TaskService()
+
+# --- API Endpoints ---
+@router.get("/{task_id}", response_model=TaskStatusDetailResponse, summary="Get Celery Task Status")
+async def get_celery_task_status(
+    task_id: str = Path(..., description="The ID of the Celery task to query.", min_length=1),
+    task_service: TaskService = Depends(get_task_service)
+):
     """
-    获取任务状态
-    
-    - 根据任务ID返回当前状态
-    - 如果完成，提供结果链接
+    Retrieves the status, result, and details of a Celery task
+    by its ID.
     """
-    # 暂时使用简单的模拟实现
-    return {
-        "task_id": task_id,
-        "status": "processing",  # 'processing', 'completed', 'failed'
-        "progress": 65,  # 百分比
-        "message": "正在处理仓库内容...",
-        "result_url": None  # 完成时提供结果的URL
-    } 
+    if not task_id or task_id.isspace():
+        # Path validation should catch this, but as a safeguard.
+        raise HTTPException(status_code=400, detail="Task ID cannot be empty.")
+        
+    try:
+        # TaskService.get_task_status returns a dict:
+        # {"task_id": str, "status": str, "result": Any, "details": Any}
+        status_info = task_service.get_task_status(task_id=task_id)
+        
+        # The TaskService might return a status like "UNKNOWN" or "ERROR_FETCHING_STATUS"
+        # if Celery connection fails or other issues occur within the service.
+        # These are valid states to return to the client.
+        if status_info.get("status") == "UNKNOWN" and "Celery connection error" in str(status_info.get("result")):
+             # Potentially map this to a 503 Service Unavailable if Celery is down
+             pass # For now, return as is from service.
+
+        return TaskStatusDetailResponse(**status_info)
+        
+    except Exception as e:
+        # This would catch unexpected errors in this endpoint handler itself,
+        # not errors from within TaskService that are already handled and returned.
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred while fetching task status: {str(e)}")

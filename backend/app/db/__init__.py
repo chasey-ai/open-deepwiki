@@ -1,16 +1,16 @@
-# For easier access to database components, import them here.
+# 为了更方便地访问数据库组件，在此处导入它们。
 
-# Import the Base for Alembic and other ORM operations
+# 导入 Base 用于 Alembic 和其他 ORM 操作
 from .session import Base
 
-# Import all models to make them accessible via app.db.<ModelName>
-# and to ensure they are registered with SQLAlchemy's metadata.
+# 导入所有模型，使其可以通过 app.db.<ModelName> 访问，
+# 并确保它们已在 SQLAlchemy 的元数据中注册。
 from .models import Repository
 from .models import WikiDocument
 from .models import Task
-from .models import KnowledgeBase # Even if not directly modified, it's part of the models
+from .models import KnowledgeBase # 即使没有直接修改，它也是模型的一部分。
 
-# You can also define an __all__ variable if you want to control `from app.db import *`
+# 你也可以定义一个 __all__ 变量来控制 `from app.db import *` 的行为
 __all__ = [
     "Base",
     "Repository",

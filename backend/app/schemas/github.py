@@ -3,30 +3,30 @@ from typing import Optional
 from datetime import datetime
 
 class RepositoryRequest(BaseModel):
-    """Request model for providing a GitHub repository URL."""
-    url: HttpUrl = Field(..., description="The URL of the GitHub repository.")
+    """提供 GitHub 仓库 URL 的请求模型。"""
+    url: HttpUrl = Field(..., description="GitHub 仓库的 URL。")
     
 class RepositoryBaseInfo(BaseModel):
-    """Base model for repository information."""
-    id: str = Field(..., description="Unique identifier for the repository (e.g., 'owner_name').")
-    url: str = Field(..., description="URL of the repository.")
-    name: str = Field(..., description="Name of the repository.")
-    owner: str = Field(..., description="Owner of the repository.")
-    description: Optional[str] = Field(None, description="Description of the repository.")
+    """仓库信息的基础模型。"""
+    id: str = Field(..., description="仓库的唯一标识符 (例如：'owner_name')。")
+    url: str = Field(..., description="仓库的 URL。")
+    name: str = Field(..., description="仓库的名称。")
+    owner: str = Field(..., description="仓库的所有者。")
+    description: Optional[str] = Field(None, description="仓库的描述。")
     
 class RepositoryResponse(RepositoryBaseInfo):
-    """Response model for repository processing tasks."""
-    task_id: str = Field(..., description="ID of the task initiated for repository processing.")
-    status: str = Field(..., description="Current status of the task.")
-    message: str = Field(..., description="A message related to the task status.")
+    """仓库处理任务的响应模型。"""
+    task_id: str = Field(..., description="为仓库处理启动的任务 ID。")
+    status: str = Field(..., description="任务的当前状态。")
+    message: str = Field(..., description="与任务状态相关的消息。")
     
     class Config:
         orm_mode = True
 
 class RepositoryDetail(RepositoryBaseInfo):
-    """Detailed repository information including timestamps."""
-    created_at: datetime = Field(..., description="Timestamp of when the repository record was created.")
-    updated_at: datetime = Field(..., description="Timestamp of when the repository record was last updated.")
+    """包含时间戳的详细仓库信息。"""
+    created_at: datetime = Field(..., description="仓库记录创建时的时间戳。")
+    updated_at: datetime = Field(..., description="仓库记录上次更新时的时间戳。")
     
     class Config:
         orm_mode = True

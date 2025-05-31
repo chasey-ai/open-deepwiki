@@ -13,9 +13,6 @@ engine = create_engine(
 # 创建会话工厂
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 创建声明性基类
-Base = declarative_base()
-
 # 依赖函数，用于获取数据库会话
 def get_db():
     db = SessionLocal()
